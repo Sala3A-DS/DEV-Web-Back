@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YaRooms — Agendamento de Salas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/yarooms/yaruims.css">
+</head>
+<body data-theme="dark">
+
+<!-- ============================================================
+     HOME SCREEN
+============================================================ -->
+<div class="screen active" id="screen-home">
+  <nav class="navbar">
+    <a class="brand" href="#" onclick="go('home');return false;">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V12Z" stroke="#1a2f54" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="9" y="14" width="2" height="2" fill="#1a2f54"/>
+          <rect x="13" y="14" width="2" height="2" fill="#1a2f54"/>
+        </svg>
+      </div>
+      <span class="brand-name"><span class="ya">Ya</span>Rooms</span>
+    </a>
+
+    <div id="nav-auth-buttons">
+      <button class="btn btn-ghost" onclick="go('login')" style="padding:0.6rem 1.4rem;font-size:0.88rem;">Entrar</button>
+    </div>
+  </nav>
+
+  <section class="home-hero">
+    <div class="tag">Sistema de Agendamento Escolar</div>
+    <h1 class="hero-title">Reserve salas com <span class="accent">praticidade & clareza</span></h1>
+    <p class="hero-sub">Gerencie o uso dos espaços da escola em tempo real. Sem conflitos, sem papéis, sem confusão.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="requireAuth()">
+        Fazer reserva agora
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     LOGIN SCREEN
+============================================================ -->
+<div class="screen" id="screen-login">
+  <button type="button" class="back-btn" onclick="goBack()" aria-label="Voltar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar
+  </button>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V12Z" stroke="#1a2f54" stroke-width="2" stroke-linejoin="round"/>
+            <rect x="9" y="14" width="2" height="2" fill="#1a2f54"/>
+            <rect x="13" y="14" width="2" height="2" fill="#1a2f54"/>
+          </svg>
+        </div>
+        <h2 class="auth-title">Bem-vindo ao <span class="gold">YaRooms</span></h2>
+        <p class="auth-subtitle">Acesse sua conta para gerenciar reservas e salas em tempo real.</p>
+      </div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="login-email" placeholder="seuemail@escola.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <input type="password" class="form-input" id="login-password" placeholder="Digite sua senha" required>
+        </div>
+        <div class="form-extras">
+          <label class="checkbox-wrap">
+            <input type="checkbox">
+            <span>Lembrar de mim</span>
+          </label>
+          <button type="button" class="link" onclick="go('forgot')">Esqueci minha senha</button>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+      <p class="auth-footer">Ainda não tem conta? <button class="link" onclick="go('register')">Criar cadastro</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     REGISTER SCREEN
+============================================================ -->
+<div class="screen" id="screen-register">
+  <button type="button" class="back-btn" onclick="goBack()" aria-label="Voltar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar
+  </button>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V12Z" stroke="#1a2f54" stroke-width="2" stroke-linejoin="round"/><rect x="9" y="14" width="2" height="2" fill="#1a2f54"/><rect x="13" y="14" width="2" height="2" fill="#1a2f54"/></svg>
+        </div>
+        <h2 class="auth-title">Criar <span class="gold">cadastro</span></h2>
+        <p class="auth-subtitle">Cadastre-se para reservar salas e acompanhar os espaços da escola.</p>
+      </div>
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input type="text" class="form-input" id="reg-name" placeholder="Digite seu nome" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input type="email" class="form-input" id="reg-email" placeholder="seuemail@escola.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de usuário</label>
+          <select class="form-select" id="reg-type" required>
+            <option value="">Selecione</option>
+            <option>Professor(a)</option>
+            <option>Coordenador(a)</option>
+            <option>Diretor(a)</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input type="password" class="form-input" id="reg-pass" placeholder="Mínimo 6 caracteres" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar senha</label>
+            <input type="password" class="form-input" id="reg-pass2" placeholder="Repita a senha" minlength="6" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+      </form>
+      <p class="auth-footer">Já possui conta? <button class="link" onclick="go('login')">Entrar agora</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FORGOT PASSWORD SCREEN
+============================================================ -->
+<div class="screen" id="screen-forgot">
+  <button type="button" class="back-btn" onclick="goBack()" aria-label="Voltar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Voltar
+  </button>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1a2f54" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h2 class="auth-title">Recuperar <span class="gold">senha</span></h2>
+        <p class="auth-subtitle">Informe seu e-mail e enviaremos um link para você redefinir a senha.</p>
+      </div>
+      <form onsubmit="handleForgot(event)">
+        <div class="form-group">
+          <label class="form-label">E-mail cadastrado</label>
+          <input type="email" class="form-input" id="forgot-email" placeholder="seuemail@escola.com" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Enviar link de recuperação</button>
+      </form>
+      <p class="auth-footer">Lembrou da senha? <button class="link" onclick="go('login')">Voltar para login</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DASHBOARD (LOGGED IN)
+============================================================ -->
+<div class="screen" id="screen-dashboard">
+  <nav class="navbar">
+    <button type="button" class="back-btn-nav" onclick="goBack()" aria-label="Voltar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Voltar
+    </button>
+    <a class="brand" href="#" onclick="go('dashboard');return false;">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V12Z" stroke="#1a2f54" stroke-width="2" stroke-linejoin="round"/><rect x="9" y="14" width="2" height="2" fill="#1a2f54"/><rect x="13" y="14" width="2" height="2" fill="#1a2f54"/></svg>
+      </div>
+      <span class="brand-name"><span class="ya">Ya</span>Rooms</span>
+    </a>
+
+    <button class="user-chip" onclick="openSettings()">
+      <span class="user-avatar" id="user-avatar-letter">U</span>
+      <span class="user-chip-name" id="user-chip-name">Usuário</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </nav>
+
+  <main class="dashboard">
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title">Bem-vindo, <span class="accent" id="dash-user-name">visitante</span></h1>
+        <p class="dash-sub">Gerencie suas reservas e veja a disponibilidade das salas.</p>
+      </div>
+      <button class="btn btn-primary" onclick="openReserveModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova reserva
+      </button>
+    </div>
+
+    <div class="dash-grid">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <h4 class="sidebar-title">Calendário</h4>
+          <div class="mini-cal">
+            <div class="mini-cal-head">
+              <button class="mini-cal-nav" id="mini-cal-prev" type="button" aria-label="Mês anterior">‹</button>
+              <span id="mini-cal-label">Abril 2026</span>
+              <button class="mini-cal-nav" id="mini-cal-next" type="button" aria-label="Próximo mês">›</button>
+            </div>
+            <div class="mini-cal-grid" id="mini-cal-grid"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="calendar-card">
+
+
+        <div class="turno-bar">
+          <button class="turno-nav" id="turno-prev" type="button" aria-label="Turno anterior">‹</button>
+          <span class="turno-label" id="turno-label">Manhã</span>
+          <button class="turno-nav" id="turno-next" type="button" aria-label="Próximo turno">›</button>
+        </div>
+
+        <div class="cal-grid" id="cal-grid" data-turno="manha">
+          <!-- Header row -->
+          <div class="cal-cell head">Hora</div>
+          <div class="cal-cell head" data-day="seg">Seg</div>
+          <div class="cal-cell head" data-day="ter">Ter</div>
+          <div class="cal-cell head today" data-day="qua">Qua</div>
+          <div class="cal-cell head" data-day="qui">Qui</div>
+          <div class="cal-cell head" data-day="sex">Sex</div>
+
+          <div class="cal-cell time turno-manha">7:00–7:50</div>
+          <div class="cal-cell turno-manha" data-slot="seg-7"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-7"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-7"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-7"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-7"></div>
+
+          <div class="cal-cell time turno-manha">7:50–8:40</div>
+          <div class="cal-cell turno-manha" data-slot="seg-8"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-8"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-8"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-8"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-8"></div>
+
+          <div class="cal-cell time turno-manha">8:40–9:30</div>
+          <div class="cal-cell turno-manha" data-slot="seg-9"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-9"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-9"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-9"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-9"></div>
+
+          <div class="cal-cell time turno-manha">9:50–10:40</div>
+          <div class="cal-cell turno-manha" data-slot="seg-10"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-10"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-10"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-10"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-10"></div>
+
+          <div class="cal-cell time turno-manha">10:40–11:30</div>
+          <div class="cal-cell turno-manha" data-slot="seg-11"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-11"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-11"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-11"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-11"></div>
+
+          <div class="cal-cell time turno-manha">11:30–12:20</div>
+          <div class="cal-cell turno-manha" data-slot="seg-12"></div>
+          <div class="cal-cell turno-manha" data-slot="ter-12"></div>
+          <div class="cal-cell turno-manha" data-slot="qua-12"></div>
+          <div class="cal-cell turno-manha" data-slot="qui-12"></div>
+          <div class="cal-cell turno-manha" data-slot="sex-12"></div>
+
+          <div class="cal-cell time turno-tarde">13:00–13:50</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-13"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-13"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-13"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-13"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-13"></div>
+
+          <div class="cal-cell time turno-tarde">13:50–14:40</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-14"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-14"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-14"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-14"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-14"></div>
+
+          <div class="cal-cell time turno-tarde">14:40–15:30</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-15"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-15"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-15"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-15"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-15"></div>
+
+          <div class="cal-cell time turno-tarde">15:50–16:40</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-16"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-16"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-16"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-16"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-16"></div>
+
+          <div class="cal-cell time turno-tarde">16:40–17:30</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-17"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-17"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-17"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-17"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-17"></div>
+
+          <div class="cal-cell time turno-tarde">17:30–18:20</div>
+          <div class="cal-cell turno-tarde" data-slot="seg-18"></div>
+          <div class="cal-cell turno-tarde" data-slot="ter-18"></div>
+          <div class="cal-cell turno-tarde" data-slot="qua-18"></div>
+          <div class="cal-cell turno-tarde" data-slot="qui-18"></div>
+          <div class="cal-cell turno-tarde" data-slot="sex-18"></div>
+
+          <div class="cal-cell time turno-noite">19:00–19:45</div>
+          <div class="cal-cell turno-noite" data-slot="seg-19"></div>
+          <div class="cal-cell turno-noite" data-slot="ter-19"></div>
+          <div class="cal-cell turno-noite" data-slot="qua-19"></div>
+          <div class="cal-cell turno-noite" data-slot="qui-19"></div>
+          <div class="cal-cell turno-noite" data-slot="sex-19"></div>
+
+          <div class="cal-cell time turno-noite">19:45–20:30</div>
+          <div class="cal-cell turno-noite" data-slot="seg-20"></div>
+          <div class="cal-cell turno-noite" data-slot="ter-20"></div>
+          <div class="cal-cell turno-noite" data-slot="qua-20"></div>
+          <div class="cal-cell turno-noite" data-slot="qui-20"></div>
+          <div class="cal-cell turno-noite" data-slot="sex-20"></div>
+
+          <div class="cal-cell time turno-noite">20:30–21:30</div>
+          <div class="cal-cell turno-noite" data-slot="seg-21"></div>
+          <div class="cal-cell turno-noite" data-slot="ter-21"></div>
+          <div class="cal-cell turno-noite" data-slot="qua-21"></div>
+          <div class="cal-cell turno-noite" data-slot="qui-21"></div>
+          <div class="cal-cell turno-noite" data-slot="sex-21"></div>
+
+          <div class="cal-cell time turno-noite">21:30–22:15</div>
+          <div class="cal-cell turno-noite" data-slot="seg-22"></div>
+          <div class="cal-cell turno-noite" data-slot="ter-22"></div>
+          <div class="cal-cell turno-noite" data-slot="qua-22"></div>
+          <div class="cal-cell turno-noite" data-slot="qui-22"></div>
+          <div class="cal-cell turno-noite" data-slot="sex-22"></div>
+
+          <div class="cal-cell time turno-noite">22:15–23:00</div>
+          <div class="cal-cell turno-noite" data-slot="seg-23"></div>
+          <div class="cal-cell turno-noite" data-slot="ter-23"></div>
+          <div class="cal-cell turno-noite" data-slot="qua-23"></div>
+          <div class="cal-cell turno-noite" data-slot="qui-23"></div>
+          <div class="cal-cell turno-noite" data-slot="sex-23"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================================
+     DIRECTOR SCREEN (cadastro de salas)
+============================================================ -->
+<div class="screen" id="screen-director">
+  <nav class="navbar">
+    <a class="brand" href="#" onclick="return false;">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 12L12 4L21 12V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V12Z" stroke="#1a2f54" stroke-width="2" stroke-linejoin="round"/><rect x="9" y="14" width="2" height="2" fill="#1a2f54"/><rect x="13" y="14" width="2" height="2" fill="#1a2f54"/></svg>
+      </div>
+      <span class="brand-name"><span class="ya">Ya</span>Rooms</span>
+    </a>
+
+    <button class="user-chip" onclick="openSettings()">
+      <span class="user-avatar" id="dir-avatar-letter">D</span>
+      <span class="user-chip-name" id="dir-chip-name">Diretor</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </nav>
+
+  <main class="dashboard">
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title">Painel do <span class="accent">diretor</span></h1>
+        <p class="dash-sub">Cadastre e gerencie as salas disponíveis para reserva.</p>
+      </div>
+    </div>
+
+    <div class="director-grid">
+      <section class="director-card">
+        <h3 class="director-card-title">Cadastrar nova sala</h3>
+        <form onsubmit="handleAddRoom(event)">
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="room-type" required>
+              <option value="">Selecione</option>
+              <option>Sala de aula</option>
+              <option>Laboratório</option>
+              <option>Auditório</option>
+              <option>Quadra</option>
+              <option>Biblioteca</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Capacidade</label>
+            <input type="number" class="form-input" id="room-capacity" placeholder="Nº de pessoas" min="1" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Cadastrar sala
+          </button>
+        </form>
+      </section>
+
+      <section class="director-card">
+        <h3 class="director-card-title">Salas cadastradas (<span id="rooms-count">0</span>)</h3>
+        <div id="rooms-list" class="rooms-list">
+          <p class="rooms-empty" id="rooms-empty">Nenhuma sala cadastrada ainda.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================================
+     SETTINGS MODAL
+============================================================ -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 class="modal-title">Configurações</h3>
+      <button class="modal-close" onclick="closeSettings()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- User card -->
+    <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:var(--bg-input);border-radius:12px;margin-bottom:1.25rem;">
+      <div class="user-avatar" style="width:48px;height:48px;font-size:1.1rem;" id="settings-avatar">U</div>
+      <div>
+        <div style="font-weight:600;font-size:1rem;" id="settings-name">Usuário</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);" id="settings-email">email@escola.com</div>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Tema</div>
+        <div class="setting-desc">Escolha entre claro ou escuro</div>
+      </div>
+      <div class="theme-toggle">
+        <button id="theme-light-btn" onclick="setTheme('light')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          Claro
+        </button>
+        <button id="theme-dark-btn" class="active" onclick="setTheme('dark')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Escuro
+        </button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Tempo na sessão</div>
+        <div class="setting-desc">Desde que você entrou no sistema</div>
+      </div>
+      <div class="time-display" id="session-time">00:00:00</div>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Entrou em</div>
+        <div class="setting-desc">Início da sessão atual</div>
+      </div>
+      <div style="color:var(--text-secondary);font-size:0.92rem;" id="session-start">--:--</div>
+    </div>
+
+    <button class="btn btn-danger" onclick="logout()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair da conta
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     NEW RESERVATION MODAL
+============================================================ -->
+<div class="modal-overlay" id="reserve-modal">
+  <div class="modal reserve-modal">
+    <div class="modal-head">
+      <h3 class="modal-title">Nova reserva</h3>
+      <button class="modal-close" onclick="closeReserveModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form onsubmit="handleReserve(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Dia</label>
+          <input type="date" class="form-input" id="res-day" required>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Horários</label>
+          <div class="hour-checks" id="res-hours">
+            <div class="hour-period-label">Manhã</div>
+            <label class="hour-check"><input type="checkbox" value="7"><span>07:00 – 07:50</span></label>
+            <label class="hour-check"><input type="checkbox" value="8"><span>07:50 – 08:40</span></label>
+            <label class="hour-check"><input type="checkbox" value="9"><span>08:40 – 09:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="10"><span>09:50 – 10:40</span></label>
+            <label class="hour-check"><input type="checkbox" value="11"><span>10:40 – 11:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="12"><span>11:30 – 12:20</span></label>
+
+            <div class="hour-period-label">Tarde</div>
+            <label class="hour-check"><input type="checkbox" value="13"><span>13:00 – 13:50</span></label>
+            <label class="hour-check"><input type="checkbox" value="14"><span>13:50 – 14:40</span></label>
+            <label class="hour-check"><input type="checkbox" value="15"><span>14:40 – 15:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="16"><span>15:50 – 16:40</span></label>
+            <label class="hour-check"><input type="checkbox" value="17"><span>16:40 – 17:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="18"><span>17:30 – 18:20</span></label>
+
+            <div class="hour-period-label">Noite</div>
+            <label class="hour-check"><input type="checkbox" value="19"><span>19:00 – 19:45</span></label>
+            <label class="hour-check"><input type="checkbox" value="20"><span>19:45 – 20:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="21"><span>20:30 – 21:30</span></label>
+            <label class="hour-check"><input type="checkbox" value="22"><span>21:30 – 22:15</span></label>
+            <label class="hour-check"><input type="checkbox" value="23"><span>22:15 – 23:00</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <input type="text" class="form-input" id="res-notes" placeholder="Ex.: Aula de robótica — turma 9º ano A">
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeReserveModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="flex:1;">Confirmar reserva</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/yarooms/yaruims.js"></script>
+
+</body>
+</html>
