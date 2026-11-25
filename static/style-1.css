@@ -1421,14 +1421,16 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: var(--text-primary);
   font-size: 0.9rem;
   box-shadow: var(--shadow-card);
-  z-index: 2000;
-  transform: translateY(150%);
-  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
-  display: flex;
+  z-index: 99999;
+  display: none;
   align-items: center;
   gap: 0.75rem;
 }
-.toast.show { transform: translateY(0); }
+
+.toast.show {
+  display: flex;
+}
+
 .toast::before {
   content: "";
   width: 8px;

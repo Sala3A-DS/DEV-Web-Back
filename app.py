@@ -39,8 +39,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__, static_folder="static")
 app.register_blueprint(bp)
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax", MAX_CONTENT_LENGTH=32768)
-limiter = Limiter(get_remote_address, app=app, storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"))
-
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
+    headers_enabled=True
+)
 app.secret_key = os.environ.get("SECRET_KEY", "troque-em-producao")
 
 DB_TYPE = os.getenv("DB_TYPE", "postgresql").strip().lower()
@@ -153,6 +157,7 @@ def static_files(filename):
 # API — autenticação
 # ──────────────────────────────────────────────
 @app.route("/api/login", methods=["POST"])
+@limiter.limit("5 per minute")
 def api_login():
     dados = request.get_json(silent=True) or {}
     email = dados.get("email", "").strip().lower()
@@ -204,6 +209,7 @@ def api_me():
 
 
 @app.route("/api/registrar", methods=["POST"])
+@limiter.limit("3 per minute")
 def api_registrar():
     dados = request.get_json(silent=True) or {}
     nome  = dados.get("nome",  "").strip()
@@ -264,7 +270,18 @@ def api_chat():
 
 @app.errorhandler(429)
 def rate_limit_error(exc):
-    return erro('Muitas perguntas. Aguarde antes de tentar novamente.',429)
+    mensagens = {
+        "/api/login": "Muitas tentativas de login. Aguarde um momento.",
+        "/api/registrar": "Limite de cadastros atingido. Tente novamente mais tarde.",
+        "/api/chat": "Limite de perguntas atingido. Tente novamente mais tarde."
+    }
+
+    mensagem = mensagens.get(
+        request.path,
+        "Muitas requisições. Tente novamente mais tarde."
+    )
+
+    return erro(mensagem, 429)
 
 
 # ──────────────────────────────────────────────
