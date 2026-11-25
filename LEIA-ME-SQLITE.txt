@@ -1,0 +1,20 @@
+Atualização SQLite para YaRooms-Groq-integrado
+
+1. Pare o Flask (Ctrl+C), se estiver rodando.
+2. Copie app.py, schedule.py e database.py para DEV-Web-Back-main,
+   substituindo os dois arquivos existentes. Faça backup antes se os editou.
+3. Preserve .env e chatbot.py (especialmente os cabeçalhos da Groq).
+4. Acrescente ao .env:
+   DB_TYPE=sqlite
+   SQLITE_PATH=yarooms.db
+5. Para testar com dados fictícios, permita temporariamente criar um diretor:
+   ALLOW_DIRECTOR_REGISTRATION=true
+   Use uma SECRET_KEY aleatória; gere com python -c "import secrets; print(secrets.token_hex(32))"
+6. Execute python app.py e abra http://127.0.0.1:5000/.
+7. Cadastre um diretor de teste, depois volte ALLOW_DIRECTOR_REGISTRATION=false
+   e reinicie o Flask. Cadastre um professor de teste e faça uma reserva.
+8. Para voltar ao PostgreSQL, ajuste DB_TYPE=postgresql e as credenciais DB_*.
+   O banco SQLite e PostgreSQL são independentes; não há migração automática.
+
+O SQLite cria yarooms.db na pasta do projeto. Não use dados reais no teste.
+A atualização não contém chave Groq, nem modifica o front-end.

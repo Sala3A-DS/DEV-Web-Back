@@ -1,0 +1,7 @@
+.booking-actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+#mine-filter[aria-pressed="true"] { background:#e6c278; color:#12203a; }
+button.event { width:100%; text-align:left; font-family:inherit; border-width:0 0 0 3px; }
+#booking-menu { margin:auto; color:var(--text); max-width:min(460px,94vw); }
+#booking-menu::backdrop { background:rgba(5,12,24,.7); }
+#booking-summary { margin:1rem 0; }
+.dash-header { flex-wrap:wrap; }

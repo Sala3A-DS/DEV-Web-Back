@@ -1,0 +1,6 @@
+.navbar.panel-navbar { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; }
+.panel-navbar > * { grid-row:1; }
+.panel-navbar .back-btn-nav { grid-column:1; justify-self:start; }
+.panel-navbar .brand { grid-column:2; }
+.panel-navbar .user-chip { grid-column:3; justify-self:end; max-width:100%; }
+.panel-navbar .user-chip-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

@@ -1,7 +1,42 @@
+# Credenciais e variáveis de ambiente
 .env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+
+# Ambientes virtuais
 .venv/
 venv/
+env/
+
+# Banco de dados SQLite
 *.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Editores de código
+.vscode/
+.idea/
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.bak
+*.zip
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cache de testes
+.pytest_cache/
+.coverage

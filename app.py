@@ -13,6 +13,17 @@ O front (index.html + yaruims.css + yaruims.js) é servido como estático.
 
 import os
 import re
+import sqlite3
+from database import connect_sqlite
+from pathlib import Path
+from contextlib import closing
+from dotenv import load_dotenv
+from schedule import bp, init_schedule
+from chatbot import answer, ChatError
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+load_dotenv(Path(__file__).with_name(".env"))
 import psycopg2
 import psycopg2.extras
 from functools import wraps
@@ -26,8 +37,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Configuração
 # ──────────────────────────────────────────────
 app = Flask(__name__, static_folder="static")
+app.register_blueprint(bp)
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax", MAX_CONTENT_LENGTH=32768)
+limiter = Limiter(get_remote_address, app=app, storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"))
 
 app.secret_key = os.environ.get("SECRET_KEY", "troque-em-producao")
+
+DB_TYPE = os.getenv("DB_TYPE", "postgresql").strip().lower()
+if DB_TYPE not in {"sqlite", "postgresql"}:
+    raise RuntimeError("DB_TYPE deve ser sqlite ou postgresql.")
+app.config["DB_TYPE"] = DB_TYPE
+SQLITE_PATH = Path(__file__).resolve().parent / os.getenv("SQLITE_PATH", "yarooms.db")
 
 DB_CONFIG = {
     "host":     os.environ.get("DB_HOST", "localhost"),
@@ -45,14 +65,27 @@ TIPOS_VALIDOS = {"Professor(a)", "Coordenador(a)", "Diretor(a)", "Outros"}
 # ──────────────────────────────────────────────
 def get_db():
     """Abre uma conexão nova a cada requisição (simples e seguro para poucos usuários)."""
+    if DB_TYPE == "sqlite":
+        return connect_sqlite(SQLITE_PATH)
     conn = psycopg2.connect(**DB_CONFIG, cursor_factory=psycopg2.extras.RealDictCursor)
     return conn
 
 
+app.config["GET_DB"] = get_db
+
+
 def init_db():
     """Cria/migra a tabela de usuários na inicialização do servidor."""
-    with get_db() as conn:
+    with closing(get_db()) as conn, conn:
         with conn.cursor() as cur:
+            if DB_TYPE == "sqlite":
+                cur.execute("BEGIN IMMEDIATE")
+                cur.execute("""CREATE TABLE IF NOT EXISTS usuarios (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL,
+                    email TEXT, senha TEXT NOT NULL, tipo TEXT NOT NULL)""")
+                cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_unique ON usuarios (lower(email))")
+                init_schedule(cur, sqlite=True)
+                return
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id    SERIAL PRIMARY KEY,
@@ -71,6 +104,7 @@ def init_db():
                 CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_unique
                 ON usuarios (lower(email))
             """)
+            init_schedule(cur)
         conn.commit()
 
 
@@ -102,7 +136,9 @@ def login_required(f):
 # ──────────────────────────────────────────────
 @app.route("/")
 def index():
-    return send_from_directory("static", "index.html")
+    response = send_from_directory("static", "index.html")
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @app.route("/<path:filename>")
@@ -125,7 +161,7 @@ def api_login():
     if not email or not senha:
         return erro("Informe e-mail e senha.")
 
-    with get_db() as conn:
+    with closing(get_db()) as conn, conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT * FROM usuarios WHERE lower(email) = %s",
@@ -181,26 +217,54 @@ def api_registrar():
     if not re.match(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
         return erro("E-mail inválido.")
 
-    if len(senha) < 6:
-        return erro("A senha precisa ter no mínimo 6 caracteres.")
+    if len(senha) < 6 or not re.search(r"[A-Z]", senha) or not re.search(r"[^A-Za-z0-9]", senha):
+        return erro("A senha precisa ter 6 caracteres, uma maiúscula e um caractere especial.")
 
     if tipo not in TIPOS_VALIDOS:
         return erro("Tipo de usuário inválido.")
 
+    if tipo == "Diretor(a)" and os.getenv("ALLOW_DIRECTOR_REGISTRATION", "false").lower() != "true":
+        return erro("Cadastro de diretor requer autorização da administração.", 403)
+
     senha_hash = generate_password_hash(senha)
 
     try:
-        with get_db() as conn:
+        with closing(get_db()) as conn, conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (%s, %s, %s, %s)",
                     (nome, email, senha_hash, tipo)
                 )
             conn.commit()
-    except psycopg2.errors.UniqueViolation:
+    except (psycopg2.errors.UniqueViolation, sqlite3.IntegrityError):
         return erro("Este e-mail já está cadastrado.", 409)
 
     return ok({"mensagem": "Usuário cadastrado com sucesso."})
+
+
+@app.post('/api/chat')
+@limiter.limit('10 per minute; 100 per day')
+def api_chat():
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict): return erro('JSON inválido.')
+    message = data.get('message')
+    if not isinstance(message, str) or not message.strip() or len(message)>1200:
+        return erro('Digite uma pergunta de até 1200 caracteres.')
+    history = data.get('history', [])
+    if not isinstance(history,list): return erro('Histórico inválido.')
+    clean = []
+    for entry in history[-6:]:
+        if isinstance(entry,dict) and entry.get('role') in ('user','assistant') and isinstance(entry.get('content'),str):
+            clean.append({'role':entry['role'],'content':entry['content'][:1500]})
+    try:
+        return ok({'reply':answer(message.strip(), clean, session.get('tipo','Visitante'))})
+    except ChatError as exc:
+        return erro(str(exc), exc.status)
+
+
+@app.errorhandler(429)
+def rate_limit_error(exc):
+    return erro('Muitas perguntas. Aguarde antes de tentar novamente.',429)
 
 
 # ──────────────────────────────────────────────
@@ -208,4 +272,4 @@ def api_registrar():
 # ──────────────────────────────────────────────
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="127.0.0.1" if DB_TYPE == "sqlite" else "0.0.0.0", port=5000)
